@@ -1,31 +1,44 @@
-SFTP
+Ansible Role for SFTP [![Build Status](https://travis-ci.org/StalkingKillah/ansible-role-sftp.svg?branch=master)](https://travis-ci.org/StalkingKillah/ansible-role-sftp)
 =========
 
-A brief description of the role goes here.
+Role for setting up SFTP access.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+No pre-requisites.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+* sftp_group_name - name of the user group allowed to login via SFTP (default: sftp-users)
+* sftp_user_home_tld - top level home directory in which user home directories are to be created (default: /home)
+* sftp_user_shell - default shell for created users. (default: /sbin/nologin)
+* sftp_allow_passwords - should password logins be allowed. (default: no)
+* sftp_additional_directories - list of additional directories (can be a dictionary with defined fields: name, mode) to be created at the end of the role. (default: [])
+* sftp_users - list of dictionaries with defined fields: name (username), password (should be hashed), key (authorized ssh key, string)
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+No dependencies.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
+    - hosts: all
+      remote_user: root
+      vars:
+        - users:
+          - name: "sftptestuser1"
+            password: "{{ 'THISROCKS' | password_hash('sha512') }}"
       roles:
-         - { role: username.rolename, x: 42 }
+        - role: sftp
+          sftp_users: "{{ users }}"
+          sftp_additional_directories:
+            - test1
+            - test2
+            - test3
 
 License
 -------

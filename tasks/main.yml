@@ -31,7 +31,7 @@
   file:
     dest: "{{ sftp_user_home_tld }}/{{ item.home | default(item.name) }}"
     state: directory
-  with_items: "{{ sftp_users }}"
+  with_items: sftp_users
 - name: SFTP | Create SFTP users
   user:
     name: "{{ item.name }}"
@@ -39,26 +39,26 @@
     home: "{{ sftp_user_home_tld }}/{{ item.home | default(item.name) }}"
     shell: "{{ sftp_user_shell }}"
     state: present
-  with_items: "{{ sftp_users }}"
+  with_items: sftp_users
 - name: SFTP | Fix ownership and permissions of home directories
   file:
     dest: "{{ sftp_user_home_tld }}/{{ item.home | default(item.name) }}"
     owner: root
     group: "{{ sftp_group_name }}"
     mode: "0750"
-  with_items: "{{ sftp_users }}"
+  with_items: sftp_users
 - name: SFTP | Setup authorized keys for users
   authorized_key:
     user: "{{ item.name }}"
     key: "{{ item.key }}"
     state: present
-  with_items: "{{ sftp_users }}"
+  with_items: sftp_users
   when: item.key is defined
 - name: SFTP | Set users passwords
   user:
     name: "{{ item.name }}"
     password: "{{ item.password }}"
-  with_items: "{{ sftp_users }}"
+  with_items: sftp_users
   when: sftp_allow_passwords and item.password is defined
 - name: SFTP | Create additional directories in user home
   file:
@@ -68,5 +68,5 @@
     mode: "{{ item[1].mode | default(0750) }}"
     state: directory
   with_nested:
-    - "{{ sftp_users }}"
-    - "{{ sftp_additional_directories }}"
+    - sftp_users
+    - sftp_additional_directories
