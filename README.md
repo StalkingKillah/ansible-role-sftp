@@ -26,6 +26,9 @@ No dependencies.
 Example Playbook
 ----------------
 
+If role is pulled from github, role name should be ansible-role-sftp.
+If role is installed from ansible galaxy, role name should be StalkingKillah.sftp
+
     - hosts: all
       remote_user: root
       vars:
@@ -33,7 +36,7 @@ Example Playbook
           - name: "sftptestuser1"
             password: "{{ 'THISROCKS' | password_hash('sha512') }}"
       roles:
-        - role: sftp
+        - role: StalkingKillah.sftp
           sftp_users: "{{ users }}"
           sftp_additional_directories:
             - test1

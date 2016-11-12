@@ -6,7 +6,7 @@
       - name: "sftptestuser1"
         password: "{{ password_hash('THISROCKS', 'sha512') }}"
   roles:
-    - role: sftp
+    - role: ansible-role-sftp
       sftp_users: "{{ users }}"
       sftp_additional_directories:
         - test1
