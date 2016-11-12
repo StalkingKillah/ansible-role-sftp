@@ -1,0 +1,72 @@
+---
+# tasks file for sftp
+- name: SFTP | Alter SFTP subsystem entry in /etc/ssh/sshd_config
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^(Subsystem[ ]* sftp .*)"
+    line: "# \1"
+    backrefs: yes
+    backup: yes
+    state: present
+  notify: SFTP | Restart SSHD
+- name: SFTP | Apply SFTP subsystem configuration in /etc/ssh/sshd_config
+  blockinfile:
+    dest: /etc/ssh/sshd_config
+    backup: yes
+    insertafter: EOF
+    marker: "# {mark} ANSIBLE MANAGED SFTP BLOCK"
+    block: |
+      Subsystem sftp internal-sftp -f AUTH -l VERBOSE
+      Match Group {{ sftp_group_name }}
+        ChrootDirectory %h
+        AllowTCPForwarding no
+        X11Forwarding no
+        ForceCommand internal-sftp
+        PasswordAuthentication {% if sftp_allow_passwords %}yes{% else %}no{% endif %}
+- name: SFTP | Create SFTP user group
+  group:
+    name: "{{ sftp_group_name }}"
+    state: present
+- name: SFTP | Create SFTP users home directory
+  file:
+    dest: "{{ sftp_user_home_tld }}/{{ item.home | default(item.name) }}"
+    state: directory
+  with_items: "{{ sftp_users }}"
+- name: SFTP | Create SFTP users
+  user:
+    name: "{{ item.name }}"
+    groups: "{{ sftp_group_name }}"
+    home: "{{ sftp_user_home_tld }}/{{ item.home | default(item.name) }}"
+    shell: "{{ sftp_user_shell }}"
+    state: present
+  with_items: "{{ sftp_users }}"
+- name: SFTP | Fix ownership and permissions of home directories
+  file:
+    dest: "{{ sftp_user_home_tld }}/{{ item.home | default(item.name) }}"
+    owner: root
+    group: "{{ sftp_group_name }}"
+    mode: "0750"
+  with_items: "{{ sftp_users }}"
+- name: SFTP | Setup authorized keys for users
+  authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.key }}"
+    state: present
+  with_items: "{{ sftp_users }}"
+  when: item.key is defined
+- name: SFTP | Set users passwords
+  user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+  with_items: "{{ sftp_users }}"
+  when: sftp_allow_passwords and item.password is defined
+- name: SFTP | Create additional directories in user home
+  file:
+    path: "{{ sftp_user_home_tld }}/{{ item[0].home | default(item[0].name) }}/{{ item[1].name | default(item[1]) }}"
+    owner: "{{ item[0].name }}"
+    group: "{{ item[0].name }}"
+    mode: "{{ item[1].mode | default(0750) }}"
+    state: directory
+  with_nested:
+    - "{{ sftp_users }}"
+    - "{{ sftp_additional_directories }}"

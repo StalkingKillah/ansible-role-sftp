@@ -1,0 +1,6 @@
+---
+# handlers file for sftp
+- name: SFTP | Restart SSHD
+  service:
+    name: ssh
+    state: restarted

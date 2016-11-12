@@ -1,0 +1,7 @@
+---
+# defaults file for sftp
+sftp_group_name: sftp-users
+sftp_user_home_tld: /home
+sftp_user_shell: /sbin/nologin
+sftp_allow_passwords: no
+sftp_additional_directories: []
