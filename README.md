@@ -27,6 +27,7 @@ Example Playbook
 ----------------
 
 If role is pulled from github, role name should be ansible-role-sftp.
+
 If role is installed from ansible galaxy, role name should be StalkingKillah.sftp
 
     - hosts: all
