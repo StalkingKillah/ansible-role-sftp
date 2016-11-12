@@ -35,7 +35,7 @@ If role is installed from ansible galaxy, role name should be StalkingKillah.sft
       vars:
         - users:
           - name: "sftptestuser1"
-            password: "{{ 'THISROCKS' | password_hash('sha512') }}"
+            password: "{{ password_hash('THISROCKS', 'sha512') }}"
       roles:
         - role: StalkingKillah.sftp
           sftp_users: "{{ users }}"
